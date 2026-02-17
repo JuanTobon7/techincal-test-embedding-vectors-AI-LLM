@@ -1,0 +1,19 @@
+# Docker
+**/.venv/
+backend/.venv/
+frontend/node_modules/
+
+# Python
+__pycache__/
+*.pyc
+
+# Node
+node_modules/
+
+# Env
+backend/.env
+frontend/.env
+
+# IDE
+.vscode/
+.idea/
