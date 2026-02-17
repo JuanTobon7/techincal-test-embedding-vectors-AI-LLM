@@ -9,8 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "replace-this-in-production")
 DEBUG = os.getenv("DJANGO_DEBUG", "1") == "1"
-configured_hosts = [host.strip() for host in os.getenv("DJANGO_ALLOWED_HOSTS", "").split(",") if host.strip()]
-ALLOWED_HOSTS = list(dict.fromkeys(configured_hosts + ["localhost", "127.0.0.1", "testserver"]))
+ALLOWED_HOSTS = [host.strip() for host in os.getenv("DJANGO_ALLOWED_HOSTS").split(",") if host.strip()]
 
 
 def _normalize_origin(origin: str) -> str:
