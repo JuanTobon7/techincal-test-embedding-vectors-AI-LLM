@@ -1,0 +1,1 @@
+# techincal-test-embedding-vectors-AI-LLM
