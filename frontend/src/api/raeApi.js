@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || "https://juanchodev.pythonanywhere.com/",
+  baseURL: import.meta.env.VITE_API_BASE_URL || "https://techincal-test-embedding-vectors-ai-llm.onrender.com/",
   timeout: 15000,
 });
 
