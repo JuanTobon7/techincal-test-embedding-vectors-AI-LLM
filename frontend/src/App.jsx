@@ -20,8 +20,11 @@ export default function App() {
         concepto_principal: concepto,
       });
       setResultado(data.rae_sugerido || "No se recibio sugerencia de RAE.");
-    } catch {
-      setError("No fue posible obtener la sugerencia. Verifica que el backend este activo.");
+    } catch (err) {
+      const message =
+        err?.response?.data?.detail ||
+        "No fue posible obtener la sugerencia. Verifica que el backend este activo.";
+      setError(message);
     } finally {
       setLoading(false);
     }

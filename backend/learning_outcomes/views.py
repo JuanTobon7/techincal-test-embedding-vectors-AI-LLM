@@ -20,7 +20,12 @@ class SuggestRAEView(APIView):
             )
         except LLMServiceError:
             return Response(
-                {"detail": "AI provider unavailable. Try again later."},
+                {
+                    "detail": (
+                        "Ups, algo salio mal. Demasiados reintentos en un minuto, "
+                        "por favor espera y vuelve a intentar."
+                    )
+                },
                 status=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
 

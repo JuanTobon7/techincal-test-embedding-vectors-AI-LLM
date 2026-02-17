@@ -18,7 +18,7 @@ class GeminiAdapter(LLMProvider):
         print('api key: ', self.api_key)
         self.base_url = os.getenv("AI_API_URL", "").strip().rstrip("/")
         self.model = os.getenv("AI_CHAT_MODEL", "").strip()
-        self.timeout_seconds = float(os.getenv("AI_TIMEOUT_SECONDS", "30"))
+        self.timeout_seconds = float(os.getenv("AI_TIMEOUT_SECONDS"))
         self.max_retries = int(os.getenv("AI_MAX_RETRIES", "3"))
         self.backoff_min = float(os.getenv("AI_BACKOFF_MIN", "1"))
         self.backoff_max = float(os.getenv("AI_BACKOFF_MAX", "8"))
@@ -67,6 +67,7 @@ class GeminiAdapter(LLMProvider):
         for attempt in self._retrying():
             with attempt:
                 params = {"key": self.api_key}
+                print("timeout time: ", self.timeout_seconds)
                 timeout = httpx.Timeout(self.timeout_seconds)
                 with httpx.Client(timeout=timeout) as client:
                     response = client.post(
@@ -76,11 +77,12 @@ class GeminiAdapter(LLMProvider):
                         content=json.dumps(self._payload(prompt)),
                     )
                     print("response: ", response)
+                    print("response code:", response.status_code)
 
                 if response.status_code == 429:
                     logger.warning("LLM rate limit")
                     print("apikey: ",self.api_key)
-                    raise LLMRetryableError("LLM rate limit")
+                    raise LLMServiceError("LLM rate limit")
 
                 if response.status_code >= 500:
                     logger.warning("LLM provider error: %s", response.status_code)
