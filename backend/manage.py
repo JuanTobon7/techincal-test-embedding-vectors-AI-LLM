@@ -4,6 +4,12 @@ import sys
 
 
 def main() -> None:
+    db_commands = {"migrate", "makemigrations", "sqlmigrate", "showmigrations", "dbshell"}
+    if len(sys.argv) > 1 and sys.argv[1] in db_commands:
+        raise SystemExit(
+            "Database commands are disabled in this project. This backend runs in API-only mode."
+        )
+
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
     try:
         from django.core.management import execute_from_command_line

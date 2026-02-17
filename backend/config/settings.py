@@ -1,5 +1,6 @@
 from pathlib import Path
 import os
+from urllib.parse import urlsplit
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -8,15 +9,25 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "replace-this-in-production")
 DEBUG = os.getenv("DJANGO_DEBUG", "1") == "1"
-print("ALLOWED_HOSTS env:", os.getenv("DJANGO_ALLOWED_HOSTS"))
-ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
-ALLOWED_HOSTS = [host.strip() for host in ALLOWED_HOSTS if host.strip()]
+configured_hosts = [host.strip() for host in os.getenv("DJANGO_ALLOWED_HOSTS", "").split(",") if host.strip()]
+ALLOWED_HOSTS = list(dict.fromkeys(configured_hosts + ["localhost", "127.0.0.1", "testserver"]))
 
-CORS_ALLOWED_ORIGINS = [
-    origin.strip()
-    for origin in os.getenv("DJANGO_CORS_ALLOWED_ORIGINS", "*").split(",")
-    if origin.strip()
-]
+
+def _normalize_origin(origin: str) -> str:
+    raw = origin.strip()
+    if not raw:
+        return ""
+    parsed = urlsplit(raw)
+    if parsed.scheme and parsed.netloc:
+        return f"{parsed.scheme}://{parsed.netloc}"
+    return raw.rstrip("/")
+
+
+CORS_ALLOWED_ORIGINS = []
+for origin in os.getenv("DJANGO_CORS_ALLOWED_ORIGINS", "http://localhost:5173").split(","):
+    normalized_origin = _normalize_origin(origin)
+    if normalized_origin:
+        CORS_ALLOWED_ORIGINS.append(normalized_origin)
 
 # Only apps we actually need
 INSTALLED_APPS = [
@@ -51,9 +62,6 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 ASGI_APPLICATION = "config.asgi.application"
 
-# No database at all
-DATABASES = {}
-
 # No password validators, auth, etc.
 AUTH_PASSWORD_VALIDATORS = []
 
@@ -83,4 +91,6 @@ LOGGING = {
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [],
     "DEFAULT_PERMISSION_CLASSES": [],
+    "UNAUTHENTICATED_USER": None,
+    "UNAUTHENTICATED_TOKEN": None,
 }
