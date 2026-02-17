@@ -2,9 +2,7 @@ def build_rae_prompt(finalidad_curso: str, concepto_principal: str, institutiona
     bloom_verbs = "Analizar, Evaluar, Crear, Disenar, Formular, Sintetizar"
     prompt = f"""Eres un especialista en diseno curricular universitario.
 
-Genera un unico Resultado de Aprendizaje Esperado (RAE) en espanol.
-
-Contexto institucional recuperado:
+Contexto institucional (obligatorio):
 {institutional_context}
 
 Insumos del profesor:
@@ -12,10 +10,10 @@ Insumos del profesor:
 - Concepto principal: {concepto_principal}
 
 Restricciones obligatorias:
+- Entregar un unico RAE.
 - Debe ser una sola oracion.
-- Debe iniciar con un verbo de alto nivel de Bloom: {bloom_verbs}.
-- Debe integrar explicitamente el contexto institucional recuperado.
-- Debe ser observable y evaluable.
+- Debe iniciar con un verbo en infinitivo de alto nivel de Bloom: {bloom_verbs}.
+- Debe ser claro, medible y centrado en el estudiante.
 - Prohibido incluir explicaciones, listas, comillas o texto adicional.
 
 Entrega solo la oracion final del RAE y nada mas.

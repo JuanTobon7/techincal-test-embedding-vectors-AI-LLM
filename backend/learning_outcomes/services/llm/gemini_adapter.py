@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 class GeminiAdapter(LLMProvider):
     def __init__(self) -> None:
         self.api_key = os.getenv("AI_API_KEY", "").strip()
+        print('api key: ', self.api_key)
         self.base_url = os.getenv("AI_API_URL", "").strip().rstrip("/")
         self.model = os.getenv("AI_CHAT_MODEL", "").strip()
         self.timeout_seconds = float(os.getenv("AI_TIMEOUT_SECONDS", "30"))
@@ -74,9 +75,11 @@ class GeminiAdapter(LLMProvider):
                         headers={"Content-Type": "application/json"},
                         content=json.dumps(self._payload(prompt)),
                     )
+                    print("response: ", response)
 
                 if response.status_code == 429:
                     logger.warning("LLM rate limit")
+                    print("apikey: ",self.api_key)
                     raise LLMRetryableError("LLM rate limit")
 
                 if response.status_code >= 500:
