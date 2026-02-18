@@ -9,7 +9,8 @@ La respuesta completa se encuentra en el archivo:
 
 ## Prueba de Comprensión y Análisis de Requerimientos
 
-📄 [Ver documento completo en PDF](./Prueba-requerimientos-Juan-Carlos-Tobon.pdf)
+📄 [Ver documento completo en PDF](./Prueba%20requerimentos%20Juan%20Carlos%20Tobon.pdf
+)
 
 
 ## Demo en Producción
