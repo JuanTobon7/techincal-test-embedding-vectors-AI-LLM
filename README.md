@@ -39,6 +39,7 @@ La aplicación se encuentra desplegada en:
 ### 1) Iniciar el backend
 Desde la raíz del proyecto:
 
+Windows
 ```powershell
 cd backend
 
@@ -63,6 +64,23 @@ if (!(Test-Path .env)) { Copy-Item .env.example .env }
 # Run
 python manage.py runserver 8000
 
+```
+Linux
+```powershell
+
+cd backend
+
+python3.11 -m venv .venv
+
+source .venv/bin/activate
+
+python -m pip install --upgrade pip setuptools wheel
+
+pip install -r requirements.txt
+
+[ -f .env ] || cp .env.example .env
+
+python manage.py runserver 8000
 ```
 
 URLs del backend:
