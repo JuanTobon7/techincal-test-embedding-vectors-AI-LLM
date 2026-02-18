@@ -1,164 +1,153 @@
-# AI-Assisted RAE Generator Prototype
+﻿# Prueba Técnica - Embedding Vectors AI LLM
 
-This repository contains a production-oriented prototype to support university professors in generating **Resultados de Aprendizaje Esperado (RAE)** using an extensible AI architecture.
+## Descripción general
+Este proyecto genera una sugerencia de **Resultado de Aprendizaje Esperado (RAE)** utilizando un LLM.
 
-## 1) System Architecture
+## Respuesta a la Prueba de Comprensión y Análisis de Requerimientos
 
-The solution is split into two decoupled applications:
+La respuesta completa se encuentra en el archivo:
 
-- `backend/` Django + DRF API with clear service layers
-- `frontend/` React (Vite) client for interaction
+## Prueba de Comprensión y Análisis de Requerimientos
 
-Backend module design (`learning_outcomes`):
+📄 [Ver documento completo en PDF](./Prueba-requerimientos-Juan-Carlos-Tobon.pdf)
 
-- `views.py`: HTTP orchestration only
-- `serializers.py`: request validation
-- `services/prompt_builder.py`: prompt construction
-- `services/institutional_context.py`: institutional context injection (RAG-ready)
-- `services/llm_service.py`: provider abstraction and implementation
-- `services/rae_service.py`: business use case orchestration
-- `models.py`: persistence model for institutional embeddings
 
-This separation keeps transport logic, domain logic, and provider logic independent.
+## Demo en Producción
 
-## 2) Why Django + DRF
+La aplicación se encuentra desplegada en:
+- **Frontend:** Vercel  
+- **Backend:** Render  
 
-Django + DRF were selected for:
+🔗 [Acceder a la aplicación](https://techincal-test-embedding-vectors-ai.vercel.app/)
 
-- Fast delivery of robust, testable API endpoints
-- Mature ORM and migration system for PostgreSQL
-- Clean request/response lifecycle and serializer-based validation
-- Strong maintainability for enterprise teams
+> En caso de una ligera demora inicial, el backend puede estar reactivándose desde estado de inactividad (*cold start*).  
 
-## 3) Why a Decoupled React Frontend
+![alt text](image-1.png)
 
-Frontend is intentionally separated from backend to enable:
+**Contiene**:
+- `backend/`: API con Django + Django REST Framework
+- `frontend/`: cliente con React + Vite
 
-- Independent deployment and scaling
-- Team autonomy (frontend/backend can evolve separately)
-- Future integration with additional channels (LMS plugin, mobile app)
-- Clean API-first architecture from day one
+## Requisitos
+- Python 3.11+
+- Node.js 20+ y npm
+- Una API key para el proveedor LLM configurado (por defecto: API compatible con OpenAI)
 
-## 4) Why pgvector From Day One
+## Ejecutar el proyecto
 
-`pgvector` is included immediately to avoid re-architecture later.
+### 1) Iniciar el backend
+Desde la raíz del proyecto:
 
-Model `InstitutionalEmbedding` already stores:
-
-- `content`: institutional guideline fragments
-- `embedding`: vector representation for semantic retrieval
-
-Even with static context now, schema and dependency are already prepared for real retrieval.
-
-## 5) Why an LLM Abstraction Layer
-
-`BaseLLMService` isolates business logic from provider SDK details.
-
-Benefits:
-
-- Swap providers (OpenAI, Azure OpenAI, Anthropic, local models) without changing `RAEService`
-- Easier testing with deterministic mocks
-- Lower coupling and safer future vendor changes
-
-## 6) Path to Real RAG (Iteration 2)
-
-Current flow uses static institutional rules through `get_institutional_context()`.
-
-Iteration 2 can extend this function to:
-
-1. Embed user query (`finalidad_curso + concepto_principal`)
-2. Run similarity search in PostgreSQL (`InstitutionalEmbedding` + pgvector)
-3. Retrieve top-k closest guideline chunks
-4. Inject retrieved context into prompt builder
-5. Preserve unchanged API contract and business flow
-
-Because the context retrieval is already encapsulated, migration to real RAG is incremental.
-
-## 7) Run Backend
-
-Prerequisites:
-
-- Python 3.12+
-- PostgreSQL 15+ with `vector` extension enabled
-
-Steps:
-
-```bash
+```powershell
 cd backend
 python -m venv .venv
-# Windows
-.venv\Scripts\activate
-# Linux/Mac
-source .venv/bin/activate
-
-pip install -r ../requirements.txt
-# Windows
-copy .env.example .env
-# Linux/Mac
-cp .env.example .env
-
-python manage.py migrate
-python manage.py runserver
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+Copy-Item .env.example .env
+python manage.py runserver 8000
 ```
 
-API endpoint:
+URLs del backend:
+- `http://127.0.0.1:8000`
+- Ruta base de la API: `http://127.0.0.1:8000/api`
 
-- `POST http://localhost:8000/api/sugerir-rae/`
 
-Request body:
+### 2) Iniciar el frontend
+En una terminal nueva:
 
-```json
-{
-  "finalidad_curso": "Formar al estudiante en la resolucion de problemas reales de manufactura",
-  "concepto_principal": "modelado de procesos"
-}
-```
-
-## 8) Run Frontend
-
-Prerequisites:
-
-- Node.js 20+
-
-Steps:
-
-```bash
+```powershell
 cd frontend
 npm install
-# Windows
-copy .env.example .env
-# Linux/Mac
-cp .env.example .env
-
 npm run dev
 ```
 
-App URL:
-
+URL del frontend:
 - `http://localhost:5173`
 
-## Prompt Used in `prompt_builder.py`
+Nota importante sobre el destino de la API:
+- Por defecto, las solicitudes del frontend apuntan a la API desplegada en `frontend/src/api/httpClient.js`.
+- Para ejecutar el stack completo en local, cambia `baseURL` en `frontend/src/api/httpClient.js` por:
 
 ```text
-Eres un experto en diseno curricular universitario.
-
-Tu tarea es proponer un unico Resultado de Aprendizaje Esperado (RAE) en espanol para una asignatura.
-
-Debes seguir estrictamente el contexto institucional y redactar una salida evaluable y medible.
-
-Contexto institucional:
-{institutional_context}
-
-Insumos del profesor:
-Finalidad del curso: {finalidad_curso}
-Concepto principal: {concepto_principal}
-
-Reglas de salida:
-- Entregar solo un RAE, en una sola oracion.
-- Empezar con un verbo de accion alineado con Bloom.
-- Debe ser observable y evaluable.
-- Mantener tono academico formal.
-- No incluir explicaciones adicionales ni listas.
+http://127.0.0.1:8000/api
 ```
 
+## Endpoint de la API
+- `POST /api/sugerir-rae/`
 
+Ejemplo de solicitud:
+
+```json
+{
+  "finalidad_curso": "Fortalecer el análisis cuantitativo para la toma de decisiones en ingeniería",
+  "concepto_principal": "estadística aplicada"
+}
+```
+
+Ejemplo de respuesta:
+
+```json
+{
+  "rae_sugerido": "Analizar datos estadísticos para justificar decisiones técnicas en contextos profesionales."
+}
+```
+
+## Variables de entorno (`backend/.env`)
+Plantilla base:
+
+```env
+DJANGO_SECRET_KEY=change-me
+DJANGO_DEBUG=1
+DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
+DJANGO_CORS_ALLOWED_ORIGINS=http://localhost:5173
+DJANGO_LOG_LEVEL=INFO
+
+LLM_PROVIDER=openai
+AI_API_KEY=your-openai-api-key
+AI_API_URL=https://api.openai.com/v1
+AI_CHAT_MODEL=gpt-4o-mini
+AI_TIMEOUT_SECONDS=20
+AI_MAX_RETRIES=3
+AI_BACKOFF_MIN=1
+AI_BACKOFF_MAX=8
+```
+
+## Ejecutar pruebas
+
+```powershell
+cd backend
+.\.venv\Scripts\Activate.ps1
+python manage.py test
+```
+
+## Prompt exacto usado para el modelo de IA
+El backend construye esta plantilla exacta en `backend/learning_outcomes/services/prompt_builder.py`:
+
+```text
+Eres un especialista en diseño curricular universitario con experiencia en formulación de Planes de Desarrollo de Curso (PDC) y alineación por competencias.
+
+Contexto institucional obligatorio:
+{institutional_context}
+
+Datos del curso:
+- Finalidad del curso: {finalidad_curso}
+- Concepto principal: {concepto_principal}
+
+Restricciones:
+- Genera un único Resultado de Aprendizaje Esperado (RAE).
+- Debe ser una sola oración.
+- Inicia con un verbo en infinitivo de alto nivel de Bloom: Analizar, Evaluar, Crear, Diseñar, Formular, Sintetizar, Aplicar, Justificar, Comparar, Integrar.
+- Debe ser claro, medible, centrado en el estudiante y evidenciable.
+- No incluyas explicaciones, listas, comillas ni texto adicional.
+- Mantén estrictamente la redacción académica y en tercera persona.
+- No agregues contenido fuera del contexto institucional ni ejemplos.
+
+Entrega:
+- Solo la oración final del RAE, nada más.
+```
+
+Contexto institucional actual inyectado por el backend (`backend/learning_outcomes/services/institutional_context.py`):
+
+```text
+Todos los RAE en la universidad deben seguir la Taxonomía de Bloom y comenzar con un verbo en infinitivo de nivel superior (ej: Analizar, Evaluar, Crear). Deben ser centrados en el estudiante y evidenciables.
+```
