@@ -41,11 +41,28 @@ Desde la raíz del proyecto:
 
 ```powershell
 cd backend
-python -m venv .venv
+
+# Ensure correct Python exists
+py -3.11 --version
+
+# Create clean env
+py -3.11 -m venv .venv
+
+# Activate
 .\.venv\Scripts\Activate.ps1
+
+# Upgrade core tooling
+python -m pip install --upgrade pip setuptools wheel
+
+# Install deps
 pip install -r requirements.txt
-Copy-Item .env.example .env
+
+# Only create .env if missing
+if (!(Test-Path .env)) { Copy-Item .env.example .env }
+
+# Run
 python manage.py runserver 8000
+
 ```
 
 URLs del backend:
